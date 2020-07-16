@@ -19,13 +19,24 @@ stdenv.mkDerivation {
 
   buildInputs = with pkgs; [
     envsubst
+    findutils
+    git
+    gnused
+    ncurses
+    patch
   ];
 
   installPhase = ''
     mkdir -p $out/bin
     cp arbash $out/bin
     wrapProgram $out/bin/arbash \
-      --prefix PATH : $envsubst/bin
+      --prefix PATH : $envsubst/bin \
+      --prefix PATH : $findutils/bin \
+      --prefix PATH : $git/bin \
+      --prefix PATH : $gnused/bin \
+      --prefix PATH : $ncurses/bin \
+      --prefix PATH : $patch/bin \
+      --argv0 arbash
   '';
 
   meta = with lib; {
