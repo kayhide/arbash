@@ -84,7 +84,7 @@ To parametarize the package name and version, you can do it as:
 When finished to edit, just save it and close the editor.
 Now the template is ready to use.
 
-## Apply the template
+### Apply the template
 
 To apply a template while filling the parameters, run the following command:
 
@@ -94,3 +94,9 @@ $ name=new-thing version=0.1.0 arbash fire my-first-template
 
 That is it.
 Check the result with git command.
+
+
+## Contributions
+
+Feel free to open an issue or PR.
+Thanks!
