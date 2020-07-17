@@ -122,7 +122,11 @@ create() {
     dst="$templates_dir/$name"
     mkdir -p $(dirname $dst)
     if [[ -e $dst && -z ${opts[force]+x} ]]; then
-        die "Already exists: $name"
+        die <<EOF
+Already exists: $name
+If it is intended, run with --force option.
+
+EOF
     fi
 
     git diff "$ref~1" "$ref" > "$dst"
