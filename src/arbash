@@ -93,6 +93,7 @@ Available options:
 Available commands:
   create
   list
+  info
   edit
   fire
   path
@@ -164,6 +165,34 @@ list() {
         fi
     fi
 }
+
+info_usage() {
+    cat <<EOF
+Usage: arbash info NAME [OPTIONS]
+
+Available options:
+  --help
+
+EOF
+}
+
+info() {
+    local name file
+    name="$(fetch_arg 1 NAME)"
+    file="$templates_dir/$name"
+    if [[ ! -f $file ]]; then
+        die "Missing template: $name"
+    fi
+    echo "Name: $name"
+    echo "Path: $file"
+    echo "Arguments:"
+    sed -e 's/${[^}]*}/\n\0\n/g' "$file" \
+        | grep '^\$' \
+        | sort \
+        | uniq \
+        | sed -e 's/^/  /'
+}
+
 
 edit_usage() {
     cat <<EOF
@@ -253,7 +282,7 @@ main()  {
                 exit 1
             fi
             ;;
-        create|list|edit|fire|path )
+        create|list|info|edit|fire|path )
             if [[ -n ${opts[help]+x} ]]; then
                 "${command}_usage"
             else
