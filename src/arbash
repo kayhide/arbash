@@ -2,8 +2,6 @@
 
 set -eu
 
-VERSION=0.1.0
-
 die() {
     if [[ -n ${1:-} ]]; then
         >&2 echo "$1"

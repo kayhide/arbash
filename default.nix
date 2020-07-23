@@ -7,9 +7,9 @@ let
 
 in
 
-stdenv.mkDerivation {
+stdenv.mkDerivation rec {
   pname = "arbash";
-  version = "0.1.0";
+  version = "0.2.0";
 
   src = ./src;
 
@@ -32,6 +32,7 @@ stdenv.mkDerivation {
     mkdir -p $out/bin
     cp arbash $out/bin
     wrapProgram $out/bin/arbash \
+      --set VERSION '${version}' \
       --prefix PATH : $coreutils/bin \
       --prefix PATH : $envsubst/bin \
       --prefix PATH : $findutils/bin \
