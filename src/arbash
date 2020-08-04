@@ -2,83 +2,15 @@
 
 set -eu
 
-die() {
-    if [[ -n ${1:-} ]]; then
-        >&2 echo "$1"
-    fi
-    if [[ ! -t 0 ]]; then
-        while read -r line; do
-            >&2 echo "$line"
-        done
-    fi
-    exit 1
-}
+here="$(cd "$(dirname $0)" && pwd)"
+source "$here/prelude.bash"
+source "$here/command/create.bash"
+source "$here/command/list.bash"
+source "$here/command/info.bash"
+source "$here/command/edit.bash"
+source "$here/command/fire.bash"
+source "$here/command/path.bash"
 
-say_status() {
-    local status="$1"
-    local body="$2"
-    local color="${3:-}"
-    if [[ -n $color ]]; then
-        tput setaf "$color"
-    else
-        case $status in
-            create ) tput setaf 2 ;;
-            delete ) tput setaf 1 ;;
-            update ) tput setaf 3 ;;
-            * ) tput setaf 6 ;;
-        esac
-    fi
-    printf "% 14s " $status
-    tput sgr0
-    echo $body
-}
-
-parse_args() {
-    args=()
-    opts=()
-    while (( 0 < ${#} )); do
-        if [[ $1 =~ --(.*) ]]; then
-            local key="${BASH_REMATCH[1]}"
-            if [[ -n ${2:-} ]]; then
-                opts[$key]="$2"
-                shift
-            else
-                opts[$key]=1
-            fi
-        else
-            args+=($1)
-        fi
-        shift
-    done
-}
-
-fetch_arg() {
-    local i="$1"
-    local name="$2"
-    local v="${args[$i]:-}"
-    if [[ -z $v ]]; then
-        if [[ -z ${3+x} ]]; then
-            die "Missing argument: $name"
-        fi
-        echo "$3"
-    else
-        echo "$v"
-    fi
-}
-
-
-verify_git_repo() {
-    if ! git status 1>&2 > /dev/null; then
-        die "Not in git repository"
-    fi
-    if [[ -z ${opts[force]+x} ]] && ! git diff --quiet; then
-        die <<EOF
-Your git working space is not clean.
-If it is intended, run with --force option.
-
-EOF
-    fi
-}
 
 usage() {
     cat <<EOF
@@ -99,173 +31,6 @@ Available commands:
 EOF
 }
 
-create_usage() {
-    cat <<EOF
-Usage: arbash create NAME [REF] [OPTIONS]
-
-Available options:
-  --help
-  --force
-  --skip-edit
-
-EOF
-}
-
-create() {
-    local name ref dst
-    verify_git_repo
-
-    name="$(fetch_arg 1 NAME)"
-    ref="$(fetch_arg 2 REF HEAD)"
-
-    dst="$templates_dir/$name"
-    mkdir -p $(dirname $dst)
-    if [[ -e $dst && -z ${opts[force]+x} ]]; then
-        die <<EOF
-Already exists: $name
-If it is intended, run with --force option.
-
-EOF
-    fi
-
-    git diff "$ref~1" "$ref" > "$dst"
-    if [[ -z ${opts[skip-edit]+x} ]]; then
-        edit $name
-    fi
-    say_status create "$name"
-}
-
-list_usage() {
-    cat <<EOF
-Usage: arbash list [NAMESPACE] [OPTIONS]
-
-Available options:
-  --help
-  --fullpath
-
-EOF
-}
-
-list() {
-    local namespace
-    namespace="$(fetch_arg 1 NAMESPACE "")"
-    if [[ -z $namespace ]]; then
-        if [[ -n ${opts[fullpath]+x} ]]; then
-            find "$templates_dir" -type f
-        else
-            (cd "$templates_dir" && find -type f | sed -e "s|^\./||")
-        fi
-    else
-        if [[ -n ${opts[fullpath]+x} ]]; then
-            find "$templates_dir/$namespace" -type f
-        else
-            (cd "$templates_dir" && find "$namespace" -type f)
-        fi
-    fi
-}
-
-info_usage() {
-    cat <<EOF
-Usage: arbash info NAME [OPTIONS]
-
-Available options:
-  --help
-
-EOF
-}
-
-info() {
-    local name file
-    name="$(fetch_arg 1 NAME)"
-    file="$templates_dir/$name"
-    if [[ ! -f $file ]]; then
-        die "Missing template: $name"
-    fi
-    echo "Name: $name"
-    echo "Path: $file"
-    echo "Arguments:"
-    sed -e 's/${[^}]*}/\n\0\n/g' "$file" \
-        | grep '^\$' \
-        | sort \
-        | uniq \
-        | sed -e 's/^/  /'
-}
-
-
-edit_usage() {
-    cat <<EOF
-Usage: arbash edit NAME [OPTIONS]
-
-Available options:
-  --help
-
-EOF
-}
-
-edit() {
-    local name file
-    name="$(fetch_arg 1 NAME)"
-    file="$templates_dir/$name"
-    if [[ ! -f $file ]]; then
-        die "Missing template: $name"
-    fi
-    "$EDITOR" "$file"
-}
-
-fire_usage() {
-    cat <<EOF
-Usage: arbash fire NAME [OPTIONS]
-
-Available options:
-  --help
-
-EOF
-}
-
-# Because an user will hand arguments via environment variables,
-# try argument names not to conflict.
-fire() {
-    local name__ file__
-    verify_git_repo
-    name__="$(fetch_arg 1 NAME)"
-    file__="$templates_dir/$name__"
-    if [[ ! -f $file__ ]]; then
-        die "Missing template: $name__"
-    fi
-
-    envsubst < "$file__" | patch -p1
-}
-
-path_usage() {
-    cat <<EOF
-Usage: arbash path [OPTIONS]
-
-Available options:
-  --help
-  --root-dir
-  --templates-dir
-
-EOF
-}
-
-path() {
-    local name file
-    if [[ -n ${opts[root-dir]+x} ]]; then
-        echo "$root_dir"
-    fi
-    if [[ -n ${opts[templates-dir]+x} ]]; then
-        echo "$templates_dir"
-    fi
-    if (( ${#opts[@]} == 0 )); then
-        cat <<EOF
-root-dir: $root_dir
-templates-dir: $templates_dir
-
-EOF
-    fi
-}
-
-
 main()  {
     local command
     command="$(fetch_arg 0 COMMAND "")"
@@ -282,9 +47,9 @@ main()  {
             ;;
         create|list|info|edit|fire|path )
             if [[ -n ${opts[help]+x} ]]; then
-                "${command}_usage"
+                "command.${command}.usage"
             else
-                "$command"
+                "command.${command}.run"
             fi
             ;;
         * ) die "Unknown command: $command" ;;
