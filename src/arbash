@@ -8,6 +8,7 @@ source "$here/command/create.bash"
 source "$here/command/list.bash"
 source "$here/command/info.bash"
 source "$here/command/edit.bash"
+source "$here/command/delete.bash"
 source "$here/command/fire.bash"
 source "$here/command/path.bash"
 
@@ -25,6 +26,7 @@ Available commands:
   list
   info
   edit
+  delete
   fire
   path
 
@@ -45,7 +47,7 @@ main()  {
                 exit 1
             fi
             ;;
-        create|list|info|edit|fire|path )
+        create|list|info|edit|delete|fire|path )
             if [[ -n ${opts[help]+x} ]]; then
                 "command.${command}.usage"
             else

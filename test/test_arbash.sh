@@ -23,6 +23,10 @@ testEdit() {
     assertContains "$(arbash edit --help)" Usage
 }
 
+testDelete() {
+    assertContains "$(arbash delete --help)" Usage
+}
+
 testFire() {
     assertContains "$(arbash fire --help)" Usage
 }
