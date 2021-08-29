@@ -29,8 +29,8 @@ stdenv.mkDerivation rec {
   ];
 
   installPhase = ''
-    mkdir -p $out/bin
-    cp arbash $out/bin
+    mkdir -p $out
+    cp -r . $out/bin
     wrapProgram $out/bin/arbash \
       --set VERSION '${version}' \
       --prefix PATH : $coreutils/bin \
