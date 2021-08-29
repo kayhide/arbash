@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 command.edit.usage() {
     cat <<EOF
 Usage: arbash edit NAME [OPTIONS]

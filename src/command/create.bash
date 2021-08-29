@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 command.create.usage() {
     cat <<EOF
 Usage: arbash create NAME [REF] [OPTIONS]

@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 command.info.usage() {
     cat <<EOF
 Usage: arbash info NAME [OPTIONS]

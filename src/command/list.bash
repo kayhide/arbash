@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 command.list.usage() {
     cat <<EOF
 Usage: arbash list [NAMESPACE] [OPTIONS]

@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 command.fire.usage() {
     cat <<EOF
 Usage: arbash fire NAME [OPTIONS]

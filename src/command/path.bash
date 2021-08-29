@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 command.path.usage() {
     cat <<EOF
 Usage: arbash path [OPTIONS]

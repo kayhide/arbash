@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 command.delete.usage() {
     cat <<EOF
 Usage: arbash delete NAME
