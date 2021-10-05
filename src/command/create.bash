@@ -27,9 +27,14 @@ If it is intended, run with --force option.
 EOF
     fi
 
-    git diff "$ref~1" "$ref" > "$dst"
+    commit_count="$(git rev-list "$ref" --count)"
+    if (( commit_count == 1 )); then
+        git diff "$(echo -n | git hash-object -t tree --stdin)" "$ref" > "$dst"
+    else
+        git diff "$ref~1" "$ref" > "$dst"
+    fi
     if [[ -z ${opts[skip-edit]+x} ]]; then
-        edit $name
+        arbash edit $name
     fi
     say_status create "$name"
 }
